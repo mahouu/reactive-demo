@@ -31,23 +31,21 @@ public class StudentsController {
     private final CourseWorkRepository courseWorkRepository;
 
     @GetMapping("/students/{studentID}")
-    Mono<ResponseEntity<Students>> getStudent(@PathVariable Long studentID) {
-        return studentsRepository.findById(studentID).map(student -> {
-            return new ResponseEntity<>(student, HttpStatus.OK);
-        });
+    public Mono<ResponseEntity<Students>> getStudent(@PathVariable Long studentID) {
+        return studentsRepository.findById(studentID).map(student ->
+             new ResponseEntity<>(student, HttpStatus.OK));
     }
 
     @PostMapping("/students")
-    Mono<ResponseEntity<Students>> addStudent(@RequestBody Students studentAdd) {
+    public Mono<ResponseEntity<Students>> addStudent(@RequestBody Students studentAdd) {
         studentAdd.setRegisteredOn(System.currentTimeMillis());
         studentAdd.setStatus(1);
-        return studentsRepository.save(studentAdd).map(student -> {
-            return new ResponseEntity<>(student, HttpStatus.CREATED);
-        });
+        return studentsRepository.save(studentAdd).map(student ->
+             new ResponseEntity<>(student, HttpStatus.CREATED));
     }
 
     @PutMapping("/students/{studentID}")
-    Mono<ResponseEntity<GeneralResponse<Students>>> updateStudent(@PathVariable Long studentID, @RequestBody Students newStudentData) {
+    public Mono<ResponseEntity<GeneralResponse<Students>>> updateStudent(@PathVariable Long studentID, @RequestBody Students newStudentData) {
 
         return studentsRepository.findById(studentID)
                                  .switchIfEmpty(Mono.error(new Exception(String.format("Student with ID %d not found", studentID))))
@@ -68,8 +66,8 @@ public class StudentsController {
                                            .build(),
                             HttpStatus.ACCEPTED
                     );
-                }).onErrorResume(e -> {
-                    return Mono.just(
+                }).onErrorResume(e ->
+                     Mono.just(
                             new ResponseEntity<>(
                                     GeneralResponse.<Students>builder()
                                                    .success(false)
@@ -77,20 +75,19 @@ public class StudentsController {
                                                    .build(),
                                     HttpStatus.NOT_FOUND
                             )
-                    );
-                });
+                    )
+                );
     }
 
     @DeleteMapping("/students/{studentID}")
     @Transactional
-    Mono<ResponseEntity<GeneralResponse<Students>>> deleteStudent(@PathVariable Long studentID) {
+    public Mono<ResponseEntity<GeneralResponse<Students>>> deleteStudent(@PathVariable Long studentID) {
         return studentsRepository.findById(studentID)
                                  .switchIfEmpty(Mono.error(new Exception(String.format("Student with ID %d not found", studentID))))
-                                 .flatMap(foundStudent -> {
-                                     return courseWorkRepository.deleteByStudentID(studentID)
+                                 .flatMap(foundStudent ->
+                                      courseWorkRepository.deleteByStudentID(studentID)
                                                                 .then(studentsRepository.deleteById(studentID))
-                                                                .thenReturn(foundStudent);
-                                 })
+                                                                .thenReturn(foundStudent))
                                  .map(deletedStudent -> {
                                      HashMap<String, Students> data = new HashMap<>();
                                      data.put("student", deletedStudent);
@@ -104,8 +101,8 @@ public class StudentsController {
                                              HttpStatus.ACCEPTED
                                      );
                                  })
-                                 .onErrorResume(e -> {
-                                     return Mono.just(
+                                 .onErrorResume(e ->
+                                      Mono.just(
                                              new ResponseEntity<>(
                                                      GeneralResponse.<Students>builder()
                                                                     .success(false)
@@ -113,12 +110,11 @@ public class StudentsController {
                                                                     .build(),
                                                      HttpStatus.NOT_FOUND
                                              )
-                                     );
-                                 });
+                                     ));
     }
 
-    @GetMapping(value = "/students", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    Flux<Students> getStudents(
+    @GetMapping(value = "/students", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<Students> getStudents(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Long limit,
             @RequestParam Map<String, String> filterParams

@@ -11,17 +11,17 @@ import reactor.core.publisher.Mono;
 @RestController
 public class SampleController {
     @GetMapping("/sample")
-    Mono<String> helloWorld(){
+    public Mono<String> helloWorld(){
         return Mono.just("Hello world");
     }
 
     @GetMapping("/multiple")
-    Flux<Integer> multiple(){
+    public Flux<Integer> multiple(){
         return Flux.just(1,2,3,4,5);
     }
 
     @GetMapping("/withDelay")
-    Flux<Integer> withDelay(){
+    public Flux<Integer> withDelay(){
         return Flux.just(1,2,3,4,5,6,7,8,9).delayElements(Duration.ofSeconds(1L)).log();
     }
 }
